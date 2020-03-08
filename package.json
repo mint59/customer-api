@@ -1,0 +1,37 @@
+{
+  "name": "cs-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node ./app.js",
+    "debug": "nodemon --inspect ./app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/habonn/cs-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/habonn/cs-api/issues"
+  },
+  "homepage": "https://github.com/habonn/cs-api#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "errorhandler": "^1.5.1",
+    "express": "^4.17.1",
+    "express-jwt": "^5.3.1",
+    "jsonwebtoken": "^8.5.1",
+    "method-override": "^3.0.0",
+    "morgan": "^1.9.1",
+    "odata-v4-pg": "^0.1.1",
+    "pg": "^7.18.2",
+    "pg-pool": "^2.0.10",
+    "uuid": "^7.0.1"
+  }
+}
