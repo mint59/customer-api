@@ -1,16 +1,16 @@
 const client = require("../../lib/db");
 const dbColumns = require("../../lib/db-columns");
 const commonColumns = require("../../lib/common-columns");
+const uuid = require("uuid");
 const dbTables = require("../../lib/db-tables");
 
 module.exports = async (req, res, next) => {
     try {
         console.log("req.params.table", req.params.table);
-        console.log("req.params.id", req.params.id);
         const table = req.params.table;
-        const id = req.params.id;
         const user = "tmp";
-        const pgm = "crud-put";
+        const pgm = "crud-post";
+        const id = uuid.v4();
 
         const tables = await dbTables.getTables();
         const columns = await dbColumns.getColumns(table);
@@ -20,17 +20,43 @@ module.exports = async (req, res, next) => {
         }
         const tableObj = tables[tableIdx];
 
-        let query = `update ${table} set`;
+        let queryCol = "";
+        let queryVal = "";
         let valIdx = 1;
         let queryParams = [];
 
-        query += ` updated_by = $${valIdx}`;
+        queryCol += `${tableObj.pk}`;
+        queryVal += `$${valIdx}`;
+        valIdx++;
+        queryParams.push(id);
+
+        queryCol += `, created_by`;
+        queryVal += `, $${valIdx}`;
         valIdx++;
         queryParams.push(user);
 
-        query += `, updated_date = NOW()`;
+        queryCol += `, created_date`;
+        queryVal += `, NOW()`;
+        // valIdx++;
+        // queryParams.push(user);
 
-        query += `, updated_pgm = $${valIdx}`;
+        queryCol += `, created_pgm`;
+        queryVal += `, $${valIdx}`;
+        valIdx++;
+        queryParams.push(pgm);
+
+        queryCol += `, updated_by`;
+        queryVal += `, $${valIdx}`;
+        valIdx++;
+        queryParams.push(user);
+
+        queryCol += `, updated_date`;
+        queryVal += `, NOW()`;
+        // valIdx++;
+        // queryParams.push(user);
+
+        queryCol += `, updated_pgm`;
+        queryVal += `, $${valIdx}`;
         valIdx++;
         queryParams.push(pgm);
 
@@ -42,7 +68,8 @@ module.exports = async (req, res, next) => {
                 continue;
             }
             if (columns.findIndex(a => a.column_name === prop) > -1) {
-                query += `, ${prop} = $${valIdx}`;
+                queryCol += `, ${prop}`;
+                queryVal += `, $${valIdx}`;
                 valIdx++;
                 let param = req.body[prop];
                 if (param === "") {
@@ -51,9 +78,7 @@ module.exports = async (req, res, next) => {
                 queryParams.push(param);
             }
         }
-        query += ` where ${tableObj.pk} = $${valIdx}`;
-        valIdx++;
-        queryParams.push(id);
+        let query = `insert into ${table} (${queryCol}) values (${queryVal})`;
 
         let result = await client.query(query, queryParams);
         // console.log("result", result);
