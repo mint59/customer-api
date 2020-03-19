@@ -6,6 +6,7 @@ const dbTables = require("../../lib/db-tables");
 module.exports = async (req, res, next) => {
     try {
         console.log("req.query.$skip", req.query.$skip);
+        console.log("req.params.id", req.params.id);
 
         let top = req.query.$top;
         if (!top || top > 1000) {
@@ -23,10 +24,12 @@ module.exports = async (req, res, next) => {
         } catch (error) {
             throw Error(`Invalid filter ${req.query.$filter}`);
         }
+        const id = req.params.id;
 
         const table = req.params.table;
         const tables = await dbTables.getTables();
         const columns = await dbColumns.getColumns(table);
+
         const tableIdx = tables.findIndex(a => a.name === table);
         if (tableIdx === -1) {
             throw Error(`Invalid table ${table}`);
@@ -34,9 +37,10 @@ module.exports = async (req, res, next) => {
 
         let queryParams = filter.parameters;
         let query = `SELECT * FROM ${table}`;
-        query += ` where status = 'C' `;
+        query += ` where status = 'O' `;
+        query += ` and sys_user_id = $1 `
+        // query += ` and sys_user_id = '97e84d8a-9106-4f63-b7fb-c58c437d896f'`;
         // query += ` order by ${column}`;
-        query += ` limit ${top} offset ${skip}`;
 
         // let response = {};
         // let result = await client.query(query, queryParams);
@@ -48,10 +52,10 @@ module.exports = async (req, res, next) => {
         // response.totalCount = response.rows.length;
 
         let response = {};
-        let result = await client.query(query, queryParams);
+        let result = await client.query(query, [id]);
         response.rows = result.rows;
 
-        let resultCount = await client.query(queryCount, queryParams);
+        let resultCount = await client.query(queryCount);
         response.totalCount = parseInt(resultCount.rows[0].count);
 
         res.send(response);

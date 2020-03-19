@@ -34,7 +34,8 @@ module.exports = async (req, res, next) => {
 
         let queryParams = filter.parameters;
         let query = `SELECT * FROM ${table}`;
-        query += ` where status = 'O' `;
+        query += ` where status = 'I' `;
+        query += ` and sys_user_id = '97e84d8a-9106-4f63-b7fb-c58c437d896f'`;
         // query += ` order by ${column}`;
         query += ` limit ${top} offset ${skip}`;
 

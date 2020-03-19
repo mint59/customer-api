@@ -8,7 +8,7 @@ module.exports = async (req, res, next) => {
         // query += ` coalesce(sum(case when status = 'I' then 1 else 0 end),0)::INTEGER as "totalCheckIn",`;
         // query += ` coalesce(sum(case when status = 'C' then 1 else 0 end),0)::INTEGER as "totalComplete"`;
         query += ` FROM task`;
-        // query += ` where ${tables[tableIdx].pk} = $1`;
+        // query += ` where ${sys_user_id} = $1`;
 
         let response;
         let result = await client.query(query);
