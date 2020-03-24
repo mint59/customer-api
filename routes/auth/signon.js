@@ -12,7 +12,7 @@ module.exports = async (req, res, next) => {
                 .json({ errors: { username: "invalid username or password" } });
         }
 
-        let query = `SELECT sys_user_id, password, first_name, last_name FROM sys_user WHERE username=($1) limit 1`;
+        let query = `SELECT sys_user_id, password, first_name, last_name, last_access_date FROM sys_user WHERE username=($1) limit 1`;
         let results = await client.query(query, [req.body.username]);
 
         if (results.rowCount == 0) {
@@ -20,7 +20,7 @@ module.exports = async (req, res, next) => {
                 .status(400)
                 .json({ errors: { username: "invalid username or password" } });
         }
-
+        
         bcrypt.compare(
             req.body.password,
             results.rows[0].password,
@@ -32,20 +32,38 @@ module.exports = async (req, res, next) => {
                         errors: { username: "invalid username or password" }
                     });
                 } else {
-                    query = `UPDATE sys_user SET last_access_date=($1) WHERE username=($2)`;
-                    await client.query(query, ["NOW()", req.body.username]);
-                    res.status(200).json({
-                        token: jwt.sign(
-                            {
-                                uid: results.rows[0].sys_user_id,
-                                un: req.body.username,
-                                fn: results.rows[0].first_name,
-                                ln: results.rows[0].last_name
-                            },
-                            jwtSecret,
-                            { expiresIn: jwtExpire }
-                        )
-                    });
+                    if (results.rows[0].last_access_date == "") {
+                        res.status(200).json({
+                            token: jwt.sign(
+                                {
+                                    uid: results.rows[0].sys_user_id,
+                                    un: req.body.username,
+                                    fn: results.rows[0].first_name,
+                                    ln: results.rows[0].last_name,
+                                    la: results.rows[0].last_access_date
+                                },
+                                jwtSecret,
+                                { expiresIn: jwtExpire }
+                            )
+                        });
+                    } else{
+                        query = `UPDATE sys_user SET last_access_date=($1) WHERE username=($2)`;
+                        await client.query(query, ["NOW()", req.body.username]);
+                        res.status(200).json({
+                            token: jwt.sign(
+                                {
+                                    uid: results.rows[0].sys_user_id,
+                                    un: req.body.username,
+                                    fn: results.rows[0].first_name,
+                                    ln: results.rows[0].last_name,
+                                    la: results.rows[0].last_access_date
+                                },
+                                jwtSecret,
+                                { expiresIn: jwtExpire }
+                            )
+                        });
+                    }
+                   
                 }
             }
         );
