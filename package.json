@@ -31,6 +31,7 @@
     "method-override": "^3.0.0",
     "morgan": "^1.9.1",
     "multer": "^1.4.2",
+    "multer-s3": "^2.9.0",
     "odata-v4-pg": "^0.1.1",
     "pg": "^7.18.2",
     "pg-pool": "^2.0.10",
